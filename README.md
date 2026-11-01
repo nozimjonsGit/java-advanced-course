@@ -3,6 +3,12 @@
 Homework for the Java advanced backend course. Each module lives in its own self-contained
 folder with its own build, and is submitted as a pull request.
 
+## Modules
+
+| Module | Topic | Status |
+| ------ | ----- | ------ |
+| [Module 1](module-1/README.md) | Spring Boot | Ready for review |
+
 ## Repository layout
 
 ```text
@@ -17,5 +23,6 @@ folder with its own build, and is submitted as a pull request.
 ## Prerequisites
 
 - Java 25
+- Docker, only to run against PostgreSQL
 
 Each module includes the Maven wrapper, so Maven does not need to be installed.
