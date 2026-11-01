@@ -5,6 +5,7 @@ import com.epam.module1.productapi.dto.ProductResponse;
 import com.epam.module1.productapi.service.ProductService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,11 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
+
+    private static final Set<String> SORTABLE_FIELDS = Set.of("id", "name", "description", "price");
 
     private final ProductService service;
 
@@ -37,6 +41,7 @@ public class ProductController {
     public Page<ProductResponse> findAll(
             @RequestParam(required = false) String name,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        validate(pageable);
         return service.findAll(name, pageable);
     }
 
@@ -64,5 +69,21 @@ public class ProductController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    /** Rejects what the database cannot run, which would otherwise surface as a server error. */
+    private static void validate(Pageable pageable) {
+        if (pageable.getOffset() > Integer.MAX_VALUE) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Page " + pageable.getPageNumber() + " is too large");
+        }
+        pageable.getSort().stream()
+                .map(Sort.Order::getProperty)
+                .filter(property -> !SORTABLE_FIELDS.contains(property))
+                .findFirst()
+                .ifPresent(property -> {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, "Cannot sort by '" + property + "'");
+                });
     }
 }

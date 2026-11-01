@@ -78,6 +78,27 @@ class ProductApiIntegrationTests {
                 .andExpect(jsonPath("$.detail").value("Cannot sort by 'doesNotExist'"));
     }
 
+    @Test
+    void sortingByNestedFieldIsABadRequest() throws Exception {
+        mockMvc.perform(get(PRODUCTS_URL).with(ADMIN).param("sort", "name.value"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Cannot sort by 'name.value'"));
+    }
+
+    @Test
+    void pageBeyondTheDatabaseOffsetLimitIsABadRequest() throws Exception {
+        mockMvc.perform(get(PRODUCTS_URL).with(ADMIN).param("page", "100000000").param("size", "100"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Page 100000000 is too large"));
+    }
+
+    @Test
+    void sortingBySupportedFieldsWorks() throws Exception {
+        mockMvc.perform(get(PRODUCTS_URL).with(ADMIN)
+                        .param("sort", "price,desc").param("sort", "description").param("sort", "name"))
+                .andExpect(status().isOk());
+    }
+
     private String createProduct(String name, String price) throws Exception {
         return mockMvc.perform(post(PRODUCTS_URL).with(ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
