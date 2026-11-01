@@ -23,12 +23,12 @@ class AdminAccountHealthIndicatorTests {
     }
 
     @Test
-    void isDownWhenNobodyCanManageTheCatalog() {
+    void warnsWhenNobodyCanManageTheCatalog() {
         when(repository.existsByRole(Role.ADMIN)).thenReturn(false);
 
         Health health = indicator.health();
 
-        assertThat(health.getStatus()).isEqualTo(Status.DOWN);
+        assertThat(health.getStatus().getCode()).isEqualTo("WARNING");
         assertThat(health.getDetails()).containsKey("reason");
     }
 }
