@@ -1,5 +1,6 @@
 package com.epam.module1.productapi.integration;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -13,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 /**
  * Exercises the whole application, from HTTP down to the database.
@@ -25,6 +28,8 @@ import org.springframework.test.web.servlet.MockMvc;
 class ProductApiIntegrationTests {
 
     private static final String PRODUCTS_URL = "/api/v1/products";
+    private static final RequestPostProcessor ADMIN =
+            jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,25 +38,25 @@ class ProductApiIntegrationTests {
     void productCanBeCreatedReadUpdatedAndDeleted() throws Exception {
         String location = createProduct("Laptop", "999.99");
 
-        mockMvc.perform(get(location))
+        mockMvc.perform(get(location).with(ADMIN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Laptop"))
                 .andExpect(jsonPath("$.price").value(999.99));
 
-        mockMvc.perform(put(location)
+        mockMvc.perform(put(location).with(ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productJson("Gaming laptop", "1299.50")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Gaming laptop"));
 
-        mockMvc.perform(get(location))
+        mockMvc.perform(get(location).with(ADMIN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Gaming laptop"))
                 .andExpect(jsonPath("$.price").value(1299.50));
 
-        mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+        mockMvc.perform(delete(location).with(ADMIN)).andExpect(status().isNoContent());
 
-        mockMvc.perform(get(location)).andExpect(status().isNotFound());
+        mockMvc.perform(get(location).with(ADMIN)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -59,7 +64,7 @@ class ProductApiIntegrationTests {
         createProduct("Mechanical keyboard", "120.00");
         createProduct("Wireless mouse", "45.00");
 
-        mockMvc.perform(get(PRODUCTS_URL).param("name", "KEYBOARD"))
+        mockMvc.perform(get(PRODUCTS_URL).with(ADMIN).param("name", "KEYBOARD"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].name").value("Mechanical keyboard"))
@@ -67,7 +72,7 @@ class ProductApiIntegrationTests {
     }
 
     private String createProduct(String name, String price) throws Exception {
-        return mockMvc.perform(post(PRODUCTS_URL)
+        return mockMvc.perform(post(PRODUCTS_URL).with(ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productJson(name, price)))
                 .andExpect(status().isCreated())

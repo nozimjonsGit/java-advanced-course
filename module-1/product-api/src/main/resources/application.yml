@@ -12,3 +12,19 @@ spring:
       pageable:
         serialization-mode: via_dto
         max-page-size: 100
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: ${APP_ISSUER}
+        client:
+          module1-client:
+            registration:
+              client-id: module1-client
+              client-secret: ${OAUTH_CLIENT_SECRET}
+              client-authentication-methods: client_secret_basic
+              authorization-grant-types: authorization_code,refresh_token
+              redirect-uris: ${OAUTH_REDIRECT_URIS}
+            require-proof-key: true
+            require-authorization-consent: false
+            token:
+              access-token-time-to-live: 15m

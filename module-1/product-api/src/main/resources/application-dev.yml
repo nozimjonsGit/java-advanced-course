@@ -10,3 +10,18 @@ spring:
 logging:
   level:
     com.epam.module1.productapi: DEBUG
+
+# Values for the placeholders in application.yml. stg and prod read them from the environment.
+APP_ISSUER: http://localhost:8080
+OAUTH_CLIENT_SECRET: "{noop}dev-secret"
+OAUTH_REDIRECT_URIS: https://oauth.pstmn.io/v1/callback,http://127.0.0.1:8089/callback
+
+app:
+  security:
+    seed-users:
+      - username: admin
+        password: admin-password
+        role: ADMIN
+      - username: user
+        password: user-password
+        role: USER
