@@ -127,6 +127,16 @@ class ProductControllerTests {
     }
 
     @Test
+    void unexpectedFailureReturnsProblemWithoutInternalDetails() throws Exception {
+        when(service.findById(5L)).thenThrow(new IllegalStateException("jdbc:postgresql://db.internal"));
+
+        mockMvc.perform(get(PRODUCTS_URL + "/5"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.detail").value("An unexpected error occurred"));
+    }
+
+    @Test
     void deleteReturnsNotFoundWhenProductIsMissing() throws Exception {
         doThrow(new ProductNotFoundException(7L)).when(service).delete(7L);
 

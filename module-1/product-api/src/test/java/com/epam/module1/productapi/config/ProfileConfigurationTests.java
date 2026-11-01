@@ -15,8 +15,9 @@ import org.springframework.context.annotation.Configuration;
  */
 class ProfileConfigurationTests {
 
-    private static final String[] DATABASE_ENVIRONMENT = {
-        "DB_HOST=db.internal", "DB_USERNAME=app", "DB_PASSWORD=secret"
+    /** Passed as arguments so they take priority over variables set in the developer's shell. */
+    private static final String[] DATABASE_SETTINGS = {
+        "--DB_HOST=db.internal", "--DB_PORT=5432", "--DB_USERNAME=app", "--DB_PASSWORD=secret"
     };
 
     @ParameterizedTest
@@ -39,9 +40,8 @@ class ProfileConfigurationTests {
         SpringApplicationBuilder builder = new SpringApplicationBuilder(NoBeans.class)
                 .web(WebApplicationType.NONE)
                 .logStartupInfo(false)
-                .profiles(profiles)
-                .properties(DATABASE_ENVIRONMENT);
-        try (ConfigurableApplicationContext context = builder.run()) {
+                .profiles(profiles);
+        try (ConfigurableApplicationContext context = builder.run(DATABASE_SETTINGS)) {
             return context.getEnvironment().getProperty("spring.datasource.url");
         }
     }

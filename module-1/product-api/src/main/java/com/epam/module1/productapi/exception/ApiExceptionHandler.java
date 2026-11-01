@@ -2,6 +2,9 @@ package com.epam.module1.productapi.exception;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,9 +22,29 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
     @ExceptionHandler(ProductNotFoundException.class)
     ProblemDetail handleProductNotFound(ProductNotFoundException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    /** Raised when a client asks to sort by a field that does not exist. */
+    @ExceptionHandler(PropertyReferenceException.class)
+    ProblemDetail handleUnknownSortField(PropertyReferenceException exception) {
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Cannot sort by '" + exception.getPropertyName() + "'");
+    }
+
+    /**
+     * Answers here rather than in the error page: API clients have no session, so the
+     * {@code /error} page would send them to the login form.
+     */
+    @ExceptionHandler(Exception.class)
+    ProblemDetail handleUnexpected(Exception exception) {
+        log.error("Unexpected error while handling a request", exception);
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
     }
 
     @Override

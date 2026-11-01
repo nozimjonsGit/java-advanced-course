@@ -71,6 +71,13 @@ class ProductApiIntegrationTests {
                 .andExpect(jsonPath("$.page.totalElements").value(1));
     }
 
+    @Test
+    void sortingByUnknownFieldIsABadRequest() throws Exception {
+        mockMvc.perform(get(PRODUCTS_URL).with(ADMIN).param("sort", "doesNotExist"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Cannot sort by 'doesNotExist'"));
+    }
+
     private String createProduct(String name, String price) throws Exception {
         return mockMvc.perform(post(PRODUCTS_URL).with(ADMIN)
                         .contentType(MediaType.APPLICATION_JSON)
