@@ -1,0 +1,10 @@
+# In-memory database, so the application runs with nothing else installed.
+spring:
+  datasource:
+    url: jdbc:h2:mem:module1_local;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+
+logging:
+  level:
+    com.epam.module1.productapi: DEBUG

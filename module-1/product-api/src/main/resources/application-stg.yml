@@ -1,0 +1,8 @@
+# DB_HOST, DB_USERNAME and DB_PASSWORD have no default: startup fails if they are missing.
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME:module1_stg}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10

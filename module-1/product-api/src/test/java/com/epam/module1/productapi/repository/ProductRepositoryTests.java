@@ -11,8 +11,10 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
+@ActiveProfiles("test")
 class ProductRepositoryTests {
 
     @Autowired
