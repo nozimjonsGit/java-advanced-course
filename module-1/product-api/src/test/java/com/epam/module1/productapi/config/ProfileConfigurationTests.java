@@ -31,9 +31,10 @@ class ProfileConfigurationTests {
         assertThat(databaseUrl(profile)).isEqualTo(expectedUrl);
     }
 
+    /** A deployment that forgets its profile must not start with the public local credentials. */
     @Test
-    void localIsTheDefaultProfile() {
-        assertThat(databaseUrl()).isEqualTo("jdbc:h2:mem:module1_local;DB_CLOSE_DELAY=-1");
+    void localIsNeverSelectedByDefault() {
+        assertThat(databaseUrl()).isNull();
     }
 
     private static String databaseUrl(String... profiles) {

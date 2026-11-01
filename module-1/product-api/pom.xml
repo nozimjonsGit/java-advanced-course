@@ -10,6 +10,10 @@
     <artifactId>product-api</artifactId>
     <name>product-api</name>
     <description>Product catalog REST API, secured with OAuth2 and JWT</description>
+    <properties>
+        <!-- Only for spring-boot:run. The packaged jar needs an explicit profile. -->
+        <spring-boot.run.profiles>local</spring-boot.run.profiles>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
