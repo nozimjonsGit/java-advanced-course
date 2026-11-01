@@ -1,6 +1,7 @@
 package com.epam.module1.productapi.config;
 
 import com.epam.module1.productapi.entity.Role;
+import com.epam.module1.productapi.exception.SecurityProblemHandler;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,24 +30,25 @@ public class ApiSecurityConfig {
 
     @Bean
     @Order(2)
-    SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain apiFilterChain(HttpSecurity http, SecurityProblemHandler problems) throws Exception {
         http.securityMatcher("/api/**")
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(HttpMethod.GET, PRODUCTS_PATH)
                         .hasAnyRole(Role.USER.name(), Role.ADMIN.name())
                         .requestMatchers(PRODUCTS_PATH).hasRole(Role.ADMIN.name())
                         .anyRequest().denyAll());
-        return requireBearerToken(http).build();
+        return requireBearerToken(http, problems).build();
     }
 
     @Bean
     @Order(3)
-    SecurityFilterChain actuatorFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain actuatorFilterChain(HttpSecurity http, SecurityProblemHandler problems)
+            throws Exception {
         http.securityMatcher("/actuator/**")
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/actuator/health/**").permitAll()
                         .anyRequest().hasRole(Role.ADMIN.name()));
-        return requireBearerToken(http).build();
+        return requireBearerToken(http, problems).build();
     }
 
     /**
@@ -61,10 +63,13 @@ public class ApiSecurityConfig {
         return decoder;
     }
 
-    private static HttpSecurity requireBearerToken(HttpSecurity http) throws Exception {
+    private static HttpSecurity requireBearerToken(HttpSecurity http, SecurityProblemHandler problems)
+            throws Exception {
         return http
-                .oauth2ResourceServer(server -> server.jwt(
-                        jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .oauth2ResourceServer(server -> server
+                        .authenticationEntryPoint(problems)
+                        .accessDeniedHandler(problems)
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable);
     }
