@@ -29,6 +29,7 @@
     </scm>
     <modules>
         <module>hello-world</module>
+        <module>product-api</module>
     </modules>
     <properties>
         <java.version>25</java.version>

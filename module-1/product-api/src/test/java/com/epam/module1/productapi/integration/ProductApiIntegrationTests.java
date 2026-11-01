@@ -1,0 +1,83 @@
+package com.epam.module1.productapi.integration;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+/**
+ * Exercises the whole application, from HTTP down to the database.
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+class ProductApiIntegrationTests {
+
+    private static final String PRODUCTS_URL = "/api/v1/products";
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void productCanBeCreatedReadUpdatedAndDeleted() throws Exception {
+        String location = createProduct("Laptop", "999.99");
+
+        mockMvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Laptop"))
+                .andExpect(jsonPath("$.price").value(999.99));
+
+        mockMvc.perform(put(location)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productJson("Gaming laptop", "1299.50")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Gaming laptop"));
+
+        mockMvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Gaming laptop"))
+                .andExpect(jsonPath("$.price").value(1299.50));
+
+        mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+
+        mockMvc.perform(get(location)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void listFiltersProductsByName() throws Exception {
+        createProduct("Mechanical keyboard", "120.00");
+        createProduct("Wireless mouse", "45.00");
+
+        mockMvc.perform(get(PRODUCTS_URL).param("name", "KEYBOARD"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Mechanical keyboard"))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+    }
+
+    private String createProduct(String name, String price) throws Exception {
+        return mockMvc.perform(post(PRODUCTS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productJson(name, price)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andReturn()
+                .getResponse()
+                .getHeader("Location");
+    }
+
+    private static String productJson(String name, String price) {
+        return """
+                {"name": "%s", "description": "Test product", "price": %s}
+                """.formatted(name, price);
+    }
+}
