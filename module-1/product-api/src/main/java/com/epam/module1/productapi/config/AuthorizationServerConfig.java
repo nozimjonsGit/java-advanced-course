@@ -46,7 +46,9 @@ public class AuthorizationServerConfig {
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
     SecurityFilterChain loginFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(requests -> requests.anyRequest().authenticated())
+        http.authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults());
         return http.build();
     }
