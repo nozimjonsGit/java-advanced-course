@@ -12,7 +12,9 @@ import com.epam.module1.productapi.dto.ProductRequest;
 import com.epam.module1.productapi.dto.ProductResponse;
 import com.epam.module1.productapi.entity.Product;
 import com.epam.module1.productapi.exception.ProductNotFoundException;
+import com.epam.module1.productapi.metrics.ProductMetrics;
 import com.epam.module1.productapi.repository.ProductRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -35,11 +37,13 @@ class ProductServiceTests {
     @Mock
     private ProductRepository repository;
 
+    private final SimpleMeterRegistry registry = new SimpleMeterRegistry();
+
     private ProductService service;
 
     @BeforeEach
     void setUp() {
-        service = new ProductService(repository);
+        service = new ProductService(repository, new ProductMetrics(registry, repository));
     }
 
     @Test
@@ -51,6 +55,7 @@ class ProductServiceTests {
         assertThat(response.name()).isEqualTo("Laptop");
         assertThat(response.description()).isEqualTo("14-inch");
         assertThat(response.price()).isEqualByComparingTo("999.99");
+        assertThat(operations("created")).isEqualTo(1);
     }
 
     @Test
@@ -73,6 +78,7 @@ class ProductServiceTests {
         assertThat(existing.getName()).isEqualTo("Laptop");
         assertThat(existing.getDescription()).isEqualTo("14-inch");
         assertThat(existing.getPrice()).isEqualByComparingTo("999.99");
+        assertThat(operations("updated")).isEqualTo(1);
     }
 
     @Test
@@ -81,6 +87,7 @@ class ProductServiceTests {
 
         assertThatThrownBy(() -> service.update(7L, REQUEST))
                 .isInstanceOf(ProductNotFoundException.class);
+        assertThat(operations("updated")).isZero();
     }
 
     @Test
@@ -91,6 +98,7 @@ class ProductServiceTests {
         service.delete(1L);
 
         verify(repository).delete(existing);
+        assertThat(operations("deleted")).isEqualTo(1);
     }
 
     @Test
@@ -100,6 +108,7 @@ class ProductServiceTests {
         assertThatThrownBy(() -> service.delete(7L))
                 .isInstanceOf(ProductNotFoundException.class);
         verify(repository, never()).delete(any());
+        assertThat(operations("deleted")).isZero();
     }
 
     @Test
@@ -123,5 +132,9 @@ class ProductServiceTests {
         Page<ProductResponse> result = service.findAll("  ", pageable);
 
         assertThat(result.getContent()).extracting(ProductResponse::name).containsExactly("Laptop");
+    }
+
+    private double operations(String operation) {
+        return registry.get("product.operations").tag("operation", operation).counter().count();
     }
 }

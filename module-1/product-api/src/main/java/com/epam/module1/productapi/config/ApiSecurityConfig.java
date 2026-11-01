@@ -39,6 +39,16 @@ public class ApiSecurityConfig {
         return requireBearerToken(http).build();
     }
 
+    @Bean
+    @Order(3)
+    SecurityFilterChain actuatorFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/actuator/**")
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/actuator/health/**").permitAll()
+                        .anyRequest().hasRole(Role.ADMIN.name()));
+        return requireBearerToken(http).build();
+    }
+
     /**
      * Validates tokens with the keys that signed them and rejects other issuers.
      */

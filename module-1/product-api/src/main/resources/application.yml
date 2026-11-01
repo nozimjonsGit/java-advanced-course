@@ -28,3 +28,16 @@ spring:
             require-authorization-consent: false
             token:
               access-token-time-to-live: 15m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      roles: ADMIN
+  metrics:
+    tags:
+      application: ${spring.application.name}
