@@ -31,9 +31,14 @@
         <module>grpc-api</module>
         <module>grpc-server</module>
         <module>grpc-client</module>
+        <module>avro-producer</module>
     </modules>
     <properties>
         <java.version>25</java.version>
+        <!-- Confluent 8.2 is built on Kafka 4.2, the version Spring Boot 4.1 manages -->
+        <confluent.version>8.2.4</confluent.version>
+        <!-- The Avro version Confluent 8.2 is built and tested with -->
+        <avro.version>1.12.1</avro.version>
     </properties>
 
     <dependencyManagement>
@@ -43,7 +48,37 @@
                 <artifactId>grpc-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-avro-serializer</artifactId>
+                <version>${confluent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>${avro.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.avro</groupId>
+                    <artifactId>avro-maven-plugin</artifactId>
+                    <version>${avro.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <repositories>
+        <!-- The Confluent serializers are not published to Maven Central -->
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+    </repositories>
 
 </project>
