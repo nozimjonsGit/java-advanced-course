@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: grpc-client
+  main:
+    web-application-type: none
+  grpc:
+    client:
+      channel:
+        ping-server:
+          target: ${PING_SERVER_TARGET:localhost:8080}

@@ -30,6 +30,7 @@
     <modules>
         <module>grpc-api</module>
         <module>grpc-server</module>
+        <module>grpc-client</module>
     </modules>
     <properties>
         <java.version>25</java.version>
