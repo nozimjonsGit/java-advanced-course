@@ -6,6 +6,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -36,12 +37,20 @@ public class MessageProducer {
         RecordMetadata metadata;
         try {
             metadata = kafkaTemplate.send(properties.topic(), key, message).join().getRecordMetadata();
+        } catch (KafkaException e) {
+            // Thrown by send() itself, when serialization fails or the topic's metadata times out
+            throw notSent(key, e);
         } catch (CompletionException e) {
-            throw new IllegalStateException(
-                    "Could not send message %s to topic %s".formatted(key, properties.topic()), e.getCause());
+            // Kafka did not acknowledge the record
+            throw notSent(key, e.getCause());
         }
         log.info("Sent {} to {}-{} at offset {}",
                 message, metadata.topic(), metadata.partition(), metadata.offset());
         return metadata;
+    }
+
+    private IllegalStateException notSent(String key, Throwable cause) {
+        return new IllegalStateException(
+                "Could not send message %s to topic %s".formatted(key, properties.topic()), cause);
     }
 }
