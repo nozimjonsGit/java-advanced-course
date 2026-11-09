@@ -1,0 +1,26 @@
+{
+    "type": "record",
+    "name": "Message",
+    "namespace": "com.epam.module2.avro",
+    "doc": "The consumer's reader schema. Avro resolves every message from the schema it was written with to this one",
+    "fields": [
+        {
+            "name": "id",
+            "type": "string"
+        },
+        {
+            "name": "text",
+            "type": "string"
+        },
+        {
+            "name": "sentAt",
+            "type": {"type": "long", "logicalType": "timestamp-millis"}
+        },
+        {
+            "name": "sender",
+            "type": "string",
+            "default": "unknown",
+            "doc": "Missing from messages written with version 1, which get this default"
+        }
+    ]
+}

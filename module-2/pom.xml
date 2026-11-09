@@ -32,6 +32,7 @@
         <module>grpc-server</module>
         <module>grpc-client</module>
         <module>avro-producer</module>
+        <module>avro-consumer</module>
     </modules>
     <properties>
         <java.version>25</java.version>

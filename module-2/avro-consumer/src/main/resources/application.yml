@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: avro-consumer
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: avro-consumer
+      # A new consumer group starts with the messages already on the topic
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # MessageDecoder deserializes the values, so the listener can see their header
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+
+app:
+  consumer:
+    topic: messages
+    schema-registry-url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
+
+logging:
+  level:
+    # Kafka clients log their whole configuration at INFO
+    org.apache.kafka: warn
+    io.confluent: warn
