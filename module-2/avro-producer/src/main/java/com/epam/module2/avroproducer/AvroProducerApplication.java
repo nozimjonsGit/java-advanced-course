@@ -12,7 +12,7 @@ public class AvroProducerApplication {
      * Closes the context once the message is sent, which flushes and closes the Kafka producer,
      * and exits with the application's exit code.
      */
-    public static void main(String[] args) {
+    static void main(String[] args) {
         System.exit(SpringApplication.exit(SpringApplication.run(AvroProducerApplication.class, args)));
     }
 

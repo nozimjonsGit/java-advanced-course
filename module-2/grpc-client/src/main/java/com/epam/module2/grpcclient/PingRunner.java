@@ -4,6 +4,7 @@ import com.epam.module2.grpc.ping.v1.PingResponse;
 import com.epam.module2.grpcclient.service.PingClient;
 import com.google.protobuf.Timestamp;
 import java.time.Instant;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -24,7 +25,7 @@ public class PingRunner implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) {
+    public void run(String @NonNull ... args) {
         PingResponse response = pingClient.ping();
         log.info("Received '{}' (server time {})", response.getMessage(), toInstant(response.getServerTime()));
     }

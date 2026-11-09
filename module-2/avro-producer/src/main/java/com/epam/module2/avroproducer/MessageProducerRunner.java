@@ -3,6 +3,7 @@ package com.epam.module2.avroproducer;
 import com.epam.module2.avroproducer.config.ProducerProperties;
 import com.epam.module2.avroproducer.service.MessageFactory;
 import com.epam.module2.avroproducer.service.MessageProducer;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -29,7 +30,7 @@ public class MessageProducerRunner implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) {
+    public void run(String @NonNull ... args) {
         log.info("Sending a message with schema {}", properties.schemaVersion());
         messageProducer.send(messageFactory.create(properties.schemaVersion(), properties.text(), properties.sender()));
     }
