@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: avro-producer
+  main:
+    web-application-type: none
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
+        # Fail within 10 seconds, instead of the default 60, when Kafka or the topic is missing
+        max.block.ms: 10000
+
+app:
+  producer:
+    topic: messages
+    schema-version: v1
+
+logging:
+  level:
+    # Kafka clients log their whole configuration at INFO
+    org.apache.kafka: warn
+    io.confluent: warn

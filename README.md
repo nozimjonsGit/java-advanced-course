@@ -8,6 +8,7 @@ folder with its own build, and is submitted as a pull request.
 | Module | Topic | Status |
 | ------ | ----- | ------ |
 | [Module 1](module-1/README.md) | Spring Boot | Ready for review |
+| [Module 2](module-2/README.md) | gRPC and Avro | Ready for review |
 
 ## Repository layout
 
@@ -23,6 +24,7 @@ folder with its own build, and is submitted as a pull request.
 ## Prerequisites
 
 - Java 25
-- Docker, only to run against PostgreSQL
+- Docker, to run PostgreSQL (module 1) and Kafka (module 2)
+- Python 3.10 or later, only for module 2's Python gRPC client
 
 Each module includes the Maven wrapper, so Maven does not need to be installed.

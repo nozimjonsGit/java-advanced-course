@@ -1,0 +1,5 @@
+# The same gRPC version as the Java server and client
+grpcio==1.84.1
+# Generates the Python stubs from the shared proto file
+grpcio-tools==1.84.1
+protobuf==7.36.2
