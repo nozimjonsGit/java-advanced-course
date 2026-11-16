@@ -1,0 +1,28 @@
+{
+    "type": "record",
+    "name": "Message",
+    "namespace": "com.epam.module2.avro",
+    "doc": "A text message, version 2: adds the sender",
+    "fields": [
+        {
+            "name": "id",
+            "type": "string",
+            "doc": "Unique message ID, also used as the Kafka record key"
+        },
+        {
+            "name": "text",
+            "type": "string"
+        },
+        {
+            "name": "sentAt",
+            "type": {"type": "long", "logicalType": "timestamp-millis"},
+            "doc": "When the producer created the message"
+        },
+        {
+            "name": "sender",
+            "type": "string",
+            "default": "unknown",
+            "doc": "Who sent the message. The default keeps version 2 backward compatible with version 1"
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package module2.ping.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.epam.module2.grpc.ping.v1";
+option java_outer_classname = "PingProto";
+
+// Answers a ping with a pong.
+service PingService {
+  // Returns "Pong" for a request whose message is "Ping".
+  // Fails with INVALID_ARGUMENT for any other message.
+  rpc Ping(PingRequest) returns (PingResponse);
+}
+
+message PingRequest {
+  // Must be "Ping".
+  string message = 1;
+  // Free-form name of the caller, such as "java-client". Only used in the server log.
+  string client = 2;
+}
+
+message PingResponse {
+  // Always "Pong".
+  string message = 1;
+  // When the server handled the request.
+  google.protobuf.Timestamp server_time = 2;
+}

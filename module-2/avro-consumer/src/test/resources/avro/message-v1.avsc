@@ -1,0 +1,22 @@
+{
+    "type": "record",
+    "name": "Message",
+    "namespace": "com.epam.module2.avro",
+    "doc": "A text message, version 1",
+    "fields": [
+        {
+            "name": "id",
+            "type": "string",
+            "doc": "Unique message ID, also used as the Kafka record key"
+        },
+        {
+            "name": "text",
+            "type": "string"
+        },
+        {
+            "name": "sentAt",
+            "type": {"type": "long", "logicalType": "timestamp-millis"},
+            "doc": "When the producer created the message"
+        }
+    ]
+}
