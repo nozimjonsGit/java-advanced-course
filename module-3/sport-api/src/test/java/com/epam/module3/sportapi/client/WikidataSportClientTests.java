@@ -9,6 +9,8 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 class WikidataSportClientTests {
@@ -125,6 +128,21 @@ class WikidataSportClientTests {
                         .hasMessage("Wikidata sport query failed with status 503: Down"))
                 .verify();
         assertThat(exchange.requests()).hasSize(1);
+    }
+
+    @Test
+    void failsWithoutTryingAgainWhenServiceDoesNotAnswerInTime() {
+        WikidataProperties shortTimeout = new WikidataProperties(PROPERTIES.baseUrl(), PROPERTIES.userAgent(),
+                PROPERTIES.limit(), Duration.ofMillis(50), PROPERTIES.rateLimitRetries(), PROPERTIES.rateLimitRetryDelay());
+        AtomicInteger requests = new AtomicInteger();
+        WebClient.Builder silentServer = WebClient.builder().exchangeFunction(request -> {
+            requests.incrementAndGet();
+            return Mono.never();
+        });
+
+        StepVerifier.create(new WikidataSportClient(silentServer, shortTimeout).findSportNames())
+                .verifyError(TimeoutException.class);
+        assertThat(requests).hasValue(1);
     }
 
     private static WikidataSportClient client(StubExchangeFunction exchange) {

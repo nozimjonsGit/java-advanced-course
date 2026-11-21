@@ -47,7 +47,7 @@ class SportSetupTests {
     }
 
     @Test
-    void importsAllGenresTwentyAtATime(CapturedOutput output) {
+    void importsAllSportsTwentyAtATime(CapturedOutput output) {
         awaitLog(output, "Imported 45 new sports from Stub");
 
         assertThat(repository.count().block()).isEqualTo(SPORT_COUNT);

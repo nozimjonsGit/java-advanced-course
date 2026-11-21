@@ -222,10 +222,10 @@ format version 1 sends it.
 
 | Level | Tests |
 | ----- | ----- |
-| Unit | `SportTests`, `BatchRequestSubscriberTests` |
-| Clients | `WikidataSportClientTests`, `RakutenItemSearchClientTests`: against stubbed HTTP responses |
+| Unit | `SportTests`, `BatchRequestSubscriberTests`, `SportSetupShutdownTests` |
+| Clients | `WikidataSportClientTests`, `RakutenItemSearchClientTests`: against stubbed HTTP responses, including errors and timeouts |
 | Sources | `RakutenSportSourceTests`, `SportSourceConfigTests`: which source each setting chooses |
 | Repository | `SportRepositoryTests` |
 | Service | `SportImportServiceTests` |
 | API | `SportApiTests`: every route through `WebTestClient` |
-| Application | `SportApiApplicationTests`, `SportSetupTests`: the backpressure sequence in the log |
+| Application | `SportApiApplicationTests`, `SportSetupTests`: the backpressure sequence in the log, `SportSetupFailureTests`: the API keeps working after a failed import |

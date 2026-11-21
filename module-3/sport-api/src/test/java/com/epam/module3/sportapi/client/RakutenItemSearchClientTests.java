@@ -7,11 +7,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.epam.module3.sportapi.config.RakutenProperties;
 import java.net.URI;
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 class RakutenItemSearchClientTests {
@@ -132,6 +136,16 @@ class RakutenItemSearchClientTests {
                         .isInstanceOf(ExternalApiException.class)
                         .hasMessage("Rakuten item search failed with status 503: " + "x".repeat(500) + "..."))
                 .verify();
+    }
+
+    @Test
+    void failsWhenApiDoesNotAnswerInTime() {
+        RakutenProperties shortTimeout = new RakutenProperties(PROPERTIES.baseUrl(), PROPERTIES.applicationId(),
+                PROPERTIES.accessKey(), PROPERTIES.genreId(), Duration.ofMillis(50));
+        WebClient.Builder silentServer = WebClient.builder().exchangeFunction(request -> Mono.never());
+
+        StepVerifier.create(new RakutenItemSearchClient(silentServer, shortTimeout).findChildGenres(101070))
+                .verifyError(TimeoutException.class);
     }
 
     @Test
