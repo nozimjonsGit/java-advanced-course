@@ -48,7 +48,7 @@ class SportSetupTests {
 
     @Test
     void importsAllGenresTwentyAtATime(CapturedOutput output) {
-        awaitLog(output, "Imported 45 new sports from Rakuten");
+        awaitLog(output, "Imported 45 new sports from Wikidata");
 
         assertThat(repository.count().block()).isEqualTo(SPORT_COUNT);
         List<String> expected = new ArrayList<>();

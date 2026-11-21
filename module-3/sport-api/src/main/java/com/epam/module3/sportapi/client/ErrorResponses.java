@@ -1,5 +1,6 @@
 package com.epam.module3.sportapi.client;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
@@ -16,13 +17,19 @@ final class ErrorResponses {
 
     /**
      * @param request what was requested, such as "Rakuten item search"
-     * @return an exception with the request, the status and the start of the body, on one line
+     * @return an exception with the request, the status and the start of the body, on one line:
+     *         a {@link RateLimitedException} for 429 Too Many Requests
      */
     static Mono<ExternalApiException> toException(String request, ClientResponse response) {
         return response.bodyToMono(String.class)
                 .defaultIfEmpty("")
-                .map(body -> new ExternalApiException("%s failed with status %d: %s"
-                        .formatted(request, response.statusCode().value(), abbreviate(body))));
+                .map(body -> {
+                    String message = "%s failed with status %d: %s"
+                            .formatted(request, response.statusCode().value(), abbreviate(body));
+                    return response.statusCode().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)
+                            ? new RateLimitedException(message)
+                            : new ExternalApiException(message);
+                });
     }
 
     private static String abbreviate(String body) {

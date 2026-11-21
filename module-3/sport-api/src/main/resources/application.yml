@@ -11,6 +11,9 @@ spring:
       mode: always
 
 app:
+  sport-import:
+    # wikidata needs no keys; rakuten needs RAKUTEN_APPLICATION_ID and RAKUTEN_ACCESS_KEY
+    source: ${SPORT_SOURCE:wikidata}
   rakuten:
     application-id: ${RAKUTEN_APPLICATION_ID:}
     access-key: ${RAKUTEN_ACCESS_KEY:}

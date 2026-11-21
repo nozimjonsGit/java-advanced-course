@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.SignalType;
 
 /**
- * Imports sports from Rakuten once the application has started. The import runs in the
+ * Imports sports from the configured source once the application has started. The import runs in the
  * background, so the API is available while it runs, and a failed import does not stop the
  * application.
  *
@@ -41,6 +41,7 @@ public class SportSetup implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        String source = properties.source().label();
         AtomicInteger imported = new AtomicInteger();
         importService.importSports()
                 // Errors are not in the list: the subscriber logs them, with the number of sports saved before
@@ -49,7 +50,7 @@ public class SportSetup implements ApplicationRunner {
                 .subscribe(new BatchRequestSubscriber<Sport>(
                         properties.batchSize(),
                         sport -> imported.incrementAndGet(),
-                        error -> log.error("Sport import from Rakuten failed after {} new sports", imported.get(), error),
-                        () -> log.info("Imported {} new sports from Rakuten", imported.get())));
+                        error -> log.error("Sport import from {} failed after {} new sports", source, imported.get(), error),
+                        () -> log.info("Imported {} new sports from {}", imported.get(), source)));
     }
 }

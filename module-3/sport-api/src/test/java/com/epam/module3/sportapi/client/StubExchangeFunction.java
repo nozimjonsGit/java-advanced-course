@@ -11,36 +11,46 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 import reactor.core.publisher.Mono;
 
 /**
- * Answers every request with the same response, and records the requests, so a WebClient can be
- * tested without a server.
+ * Answers requests with prepared responses, in order, and records the requests, so a WebClient can
+ * be tested without a server. Once the prepared responses run out, the last one answers every
+ * further request.
  */
 public final class StubExchangeFunction implements ExchangeFunction {
 
-    private final HttpStatus status;
-    private final MediaType contentType;
-    private final String body;
+    private record StubResponse(HttpStatus status, MediaType contentType, String body) {
+    }
+
+    private final List<StubResponse> responses = new ArrayList<>();
     private final List<ClientRequest> requests = new ArrayList<>();
 
-    private StubExchangeFunction(HttpStatus status, MediaType contentType, String body) {
-        this.status = status;
-        this.contentType = contentType;
-        this.body = body;
+    private StubExchangeFunction() {
     }
 
     public static StubExchangeFunction json(HttpStatus status, String body) {
-        return new StubExchangeFunction(status, MediaType.APPLICATION_JSON, body);
+        return of(status, MediaType.APPLICATION_JSON, body);
     }
 
     public static StubExchangeFunction html(HttpStatus status, String body) {
-        return new StubExchangeFunction(status, MediaType.TEXT_HTML, body);
+        return of(status, MediaType.TEXT_HTML, body);
+    }
+
+    public static StubExchangeFunction of(HttpStatus status, MediaType contentType, String body) {
+        return new StubExchangeFunction().then(status, contentType, body);
+    }
+
+    /** Adds the response to the next request. */
+    public StubExchangeFunction then(HttpStatus status, MediaType contentType, String body) {
+        responses.add(new StubResponse(status, contentType, body));
+        return this;
     }
 
     @Override
     public Mono<ClientResponse> exchange(ClientRequest request) {
+        StubResponse response = responses.get(Math.min(requests.size(), responses.size() - 1));
         requests.add(request);
-        return Mono.just(ClientResponse.create(status)
-                .header(HttpHeaders.CONTENT_TYPE, contentType.toString())
-                .body(body)
+        return Mono.just(ClientResponse.create(response.status())
+                .header(HttpHeaders.CONTENT_TYPE, response.contentType().toString())
+                .body(response.body())
                 .build());
     }
 
