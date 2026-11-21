@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: sport-api
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:55433}/${DB_NAME:module3}
+    username: ${DB_USERNAME:module3}
+    password: ${DB_PASSWORD:module3}

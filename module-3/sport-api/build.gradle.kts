@@ -1,0 +1,40 @@
+plugins {
+    java
+    id("org.springframework.boot") version "4.2.0"
+    id("io.spring.dependency-management") version "1.1.7"
+}
+
+group = "com.epam"
+version = "0.0.1-SNAPSHOT"
+description = "Module 3 reactive sport API"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    implementation("org.springframework.boot:spring-boot-starter-webclient")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    runtimeOnly("org.postgresql:r2dbc-postgresql")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-data-r2dbc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation("io.projectreactor:reactor-test")
+    // Testcontainers checks that PostgreSQL is ready over JDBC
+    testRuntimeOnly("org.postgresql:postgresql")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
