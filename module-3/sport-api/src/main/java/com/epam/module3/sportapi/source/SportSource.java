@@ -9,8 +9,8 @@ import reactor.core.publisher.Flux;
 public interface SportSource {
 
     /**
-     * Emits the names of the sports to import. A name may repeat, or belong to a sport that is
-     * already saved: the import skips those.
+     * Emits the names of the sports to import. A name may repeat, belong to a sport that is
+     * already saved, or not be a valid sport name: the import skips those.
      */
     Flux<String> fetchSportNames();
 }

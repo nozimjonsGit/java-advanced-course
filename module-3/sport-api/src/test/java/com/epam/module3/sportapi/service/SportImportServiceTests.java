@@ -57,6 +57,16 @@ class SportImportServiceTests {
     }
 
     @Test
+    void skipsNamesThatAreNotValid() {
+        Flux<String> names = Flux.just("Golf", " ", "a".repeat(Sport.MAX_NAME_LENGTH + 1), "Tennis");
+        SportImportService service = new SportImportService(() -> names, repository);
+
+        StepVerifier.create(service.importSports().map(Sport::name))
+                .expectNext("Golf", "Tennis")
+                .verifyComplete();
+    }
+
+    @Test
     void failsWhenSourceFails() {
         ExternalApiException failure = new ExternalApiException("Source is down");
         SportImportService service = new SportImportService(() -> Flux.error(failure), repository);

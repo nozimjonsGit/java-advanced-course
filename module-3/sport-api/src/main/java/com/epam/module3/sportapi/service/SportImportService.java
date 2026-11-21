@@ -1,6 +1,7 @@
 package com.epam.module3.sportapi.service;
 
 import com.epam.module3.sportapi.entity.Sport;
+import com.epam.module3.sportapi.exception.InvalidSportNameException;
 import com.epam.module3.sportapi.repository.SportRepository;
 import com.epam.module3.sportapi.source.SportSource;
 import org.slf4j.Logger;
@@ -29,11 +30,20 @@ public class SportImportService {
     /**
      * Fetches the sport names, saves a sport for each one, one at a time, and emits the saved
      * sports. Sports that already exist are skipped, so importing again saves only new sports.
+     * Names that are not valid, such as blank ones, are skipped too, so one bad name does not
+     * stop the import.
      */
     public Flux<Sport> importSports() {
         return source.fetchSportNames()
-                .map(Sport::named)
-                .concatMap(this::saveUnlessExists);
+                .concatMap(name -> toSport(name).flatMap(this::saveUnlessExists));
+    }
+
+    private static Mono<Sport> toSport(String name) {
+        return Mono.fromCallable(() -> Sport.named(name))
+                .onErrorResume(InvalidSportNameException.class, exception -> {
+                    log.warn("Skipped sport \"{}\": {}", name, exception.getMessage());
+                    return Mono.empty();
+                });
     }
 
     private Mono<Sport> saveUnlessExists(Sport sport) {

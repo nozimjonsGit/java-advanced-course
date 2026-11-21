@@ -203,6 +203,7 @@ sequence: `request(20)`, 20 `onNext`, `request(20)`, 20 `onNext`, `request(20)`,
 | Rakuten credentials not set | The import fails at once and logs why |
 | The response has no results or no genre information | The import fails and logs it, instead of importing nothing |
 | A sport from the source already exists | It is skipped; the rest are imported |
+| A name from the source is blank or longer than 100 characters | It is skipped with a warning; the rest are imported |
 | The import fails partway | The sports saved so far stay saved; the log says how many |
 
 In every case the API keeps working.
