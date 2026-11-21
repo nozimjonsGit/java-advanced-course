@@ -24,7 +24,7 @@ class SportSetupShutdownTests {
         setup.run(new DefaultApplicationArguments());
         assertThat(cancelled).isFalse();
 
-        setup.destroy();
+        setup.cancelImport();
         assertThat(cancelled).isTrue();
     }
 
@@ -32,7 +32,7 @@ class SportSetupShutdownTests {
     void shutsDownWithoutImportThatHasNotStarted() {
         SportSetup setup = setup(Flux.<String>never().doOnCancel(() -> cancelled.set(true)));
 
-        setup.destroy();
+        setup.cancelImport();
 
         assertThat(cancelled).isFalse();
     }
@@ -42,7 +42,7 @@ class SportSetupShutdownTests {
         SportSetup setup = setup(Flux.<String>empty().doOnCancel(() -> cancelled.set(true)));
 
         setup.run(new DefaultApplicationArguments());
-        setup.destroy();
+        setup.cancelImport();
 
         assertThat(cancelled).isFalse();
     }

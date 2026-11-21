@@ -7,10 +7,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
@@ -26,11 +27,11 @@ import reactor.core.publisher.SignalType;
  * {@code request(20)}, then 20 {@code onNext(...)}, then {@code request(20)} again.
  *
  * <p>An import that is still running when the application shuts down, for example while it waits
- * to try a rate-limited request again, is cancelled.
+ * for Wikidata or to try a rate-limited request again, is cancelled.
  */
 @Component
 @ConditionalOnBooleanProperty(name = "app.sport-import.enabled", matchIfMissing = true)
-public class SportSetup implements ApplicationRunner, DisposableBean {
+public class SportSetup implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(SportSetup.class);
 
@@ -64,8 +65,12 @@ public class SportSetup implements ApplicationRunner, DisposableBean {
                 .subscribe(subscriber);
     }
 
-    @Override
-    public void destroy() {
+    /**
+     * Cancels the import when the application starts to shut down. This runs before Spring stops
+     * the HTTP client and the database pool, which would otherwise make a running import fail.
+     */
+    @EventListener(ContextClosedEvent.class)
+    public void cancelImport() {
         if (!importSubscription.isDisposed()) {
             log.info("Cancelling the sport import from {}: the application is shutting down", importService.sourceName());
             importSubscription.dispose();
