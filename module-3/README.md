@@ -205,6 +205,7 @@ sequence: `request(20)`, 20 `onNext`, `request(20)`, 20 `onNext`, `request(20)`,
 | A sport from the source already exists | It is skipped; the rest are imported |
 | A name from the source is blank or longer than 100 characters | It is skipped with a warning; the rest are imported |
 | The import fails partway | The sports saved so far stay saved; the log says how many |
+| The application shuts down while the import runs | The import is cancelled; the sports saved so far stay saved |
 
 In every case the API keeps working.
 

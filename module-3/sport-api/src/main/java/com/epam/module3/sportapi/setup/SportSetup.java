@@ -7,10 +7,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Component;
+import reactor.core.Disposable;
+import reactor.core.Disposables;
 import reactor.core.publisher.SignalType;
 
 /**
@@ -21,10 +24,13 @@ import reactor.core.publisher.SignalType;
  * <p>The import is consumed in batches: this class requests {@code app.sport-import.batch-size}
  * sports at a time, and logs every request and every sport it receives, so the log shows
  * {@code request(20)}, then 20 {@code onNext(...)}, then {@code request(20)} again.
+ *
+ * <p>An import that is still running when the application shuts down, for example while it waits
+ * to try a rate-limited request again, is cancelled.
  */
 @Component
 @ConditionalOnBooleanProperty(name = "app.sport-import.enabled", matchIfMissing = true)
-public class SportSetup implements ApplicationRunner {
+public class SportSetup implements ApplicationRunner, DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(SportSetup.class);
 
@@ -33,6 +39,8 @@ public class SportSetup implements ApplicationRunner {
 
     private final SportImportService importService;
     private final SportImportProperties properties;
+
+    private volatile Disposable importSubscription = Disposables.disposed();
 
     public SportSetup(SportImportService importService, SportImportProperties properties) {
         this.importService = importService;
@@ -43,14 +51,24 @@ public class SportSetup implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         String source = importService.sourceName();
         AtomicInteger imported = new AtomicInteger();
+        BatchRequestSubscriber<Sport> subscriber = new BatchRequestSubscriber<>(
+                properties.batchSize(),
+                sport -> imported.incrementAndGet(),
+                error -> log.error("Sport import from {} failed after {} new sports", source, imported.get(), error),
+                () -> log.info("Imported {} new sports from {}", imported.get(), source));
+        importSubscription = subscriber;
         importService.importSports()
                 // Errors are not in the list: the subscriber logs them, with the number of sports saved before
                 .log(SIGNAL_LOG_CATEGORY, Level.INFO,
                         SignalType.ON_SUBSCRIBE, SignalType.REQUEST, SignalType.ON_NEXT, SignalType.ON_COMPLETE)
-                .subscribe(new BatchRequestSubscriber<Sport>(
-                        properties.batchSize(),
-                        sport -> imported.incrementAndGet(),
-                        error -> log.error("Sport import from {} failed after {} new sports", source, imported.get(), error),
-                        () -> log.info("Imported {} new sports from {}", imported.get(), source)));
+                .subscribe(subscriber);
+    }
+
+    @Override
+    public void destroy() {
+        if (!importSubscription.isDisposed()) {
+            log.info("Cancelling the sport import from {}: the application is shutting down", importService.sourceName());
+            importSubscription.dispose();
+        }
     }
 }
