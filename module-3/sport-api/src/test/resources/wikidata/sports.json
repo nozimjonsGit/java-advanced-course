@@ -1,0 +1,26 @@
+{
+  "head" : {
+    "vars" : [ "name" ]
+  },
+  "results" : {
+    "bindings" : [ {
+      "name" : {
+        "xml:lang" : "en",
+        "type" : "literal",
+        "value" : "association football"
+      }
+    }, {
+      "name" : {
+        "xml:lang" : "en",
+        "type" : "literal",
+        "value" : "chess"
+      }
+    }, {
+      "name" : {
+        "xml:lang" : "en",
+        "type" : "literal",
+        "value" : "tennis"
+      }
+    } ]
+  }
+}

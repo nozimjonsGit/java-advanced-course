@@ -1,0 +1,20 @@
+# PostgreSQL for sport-api. Local use only: the password is not a secret.
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: module3
+      POSTGRES_USER: module3
+      POSTGRES_PASSWORD: module3
+    ports:
+      - "127.0.0.1:${DB_PORT:-55433}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U module3 -d module3"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  postgres-data:

@@ -1,0 +1,31 @@
+{
+  "count": 2500000,
+  "page": 1,
+  "first": 1,
+  "last": 1,
+  "hits": 1,
+  "carrier": 0,
+  "pageCount": 100,
+  "Items": [
+    {
+      "itemName": "Golf balls, 12 pieces",
+      "itemCode": "sample-shop:10000001",
+      "itemPrice": 2980,
+      "genreId": "101077"
+    }
+  ],
+  "GenreInformation": [
+    {
+      "parent": [],
+      "current": [
+        {"genreId": 101070, "genreName": "スポーツ・アウトドア", "itemCount": 2500000, "genreLevel": 1}
+      ],
+      "children": [
+        {"genreId": 101077, "genreName": "ゴルフ", "itemCount": 400000, "genreLevel": 2},
+        {"genreId": 101078, "genreName": "テニス", "itemCount": 90000, "genreLevel": 2},
+        {"genreId": 101079, "genreName": "サッカー・フットサル", "itemCount": 120000, "genreLevel": 2}
+      ]
+    }
+  ],
+  "TagInformation": []
+}

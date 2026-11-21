@@ -1,0 +1,6 @@
+# Gradle build output
+.gradle/
+build/
+
+# Keep the Gradle wrapper, which the root .gitignore would drop with the other jars
+!gradle/wrapper/gradle-wrapper.jar
