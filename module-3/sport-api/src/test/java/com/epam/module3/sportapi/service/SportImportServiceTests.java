@@ -23,7 +23,7 @@ import reactor.test.StepVerifier;
 @Import(TestcontainersConfiguration.class)
 class SportImportServiceTests {
 
-    private static final SportImportProperties PROPERTIES = new SportImportProperties(101070);
+    private static final SportImportProperties PROPERTIES = new SportImportProperties(101070, 20);
 
     @Autowired
     private SportRepository repository;
