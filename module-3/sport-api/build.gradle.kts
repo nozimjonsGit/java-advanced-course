@@ -4,6 +4,9 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 }
 
+val isMacOs = System.getProperty("os.name").startsWith("Mac")
+val macOsClassifier = if (System.getProperty("os.arch") == "aarch64") "osx-aarch_64" else "osx-x86_64"
+
 group = "com.epam"
 version = "0.0.1-SNAPSHOT"
 description = "Module 3 reactive sport API"
@@ -23,6 +26,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webclient")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     runtimeOnly("org.postgresql:r2dbc-postgresql")
+    if (isMacOs) {
+        // Without it, Netty logs an error at startup and falls back to the JDK's DNS settings
+        runtimeOnly("io.netty:netty-resolver-dns-native-macos::$macOsClassifier")
+    }
 
     testImplementation("org.springframework.boot:spring-boot-starter-data-r2dbc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
@@ -36,8 +43,14 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+// Netty loads native libraries, such as its DNS resolver for macOS
+val nativeAccess = "--enable-native-access=ALL-UNNAMED"
+
 tasks.withType<Test> {
     useJUnitPlatform()
-    // Netty loads its native DNS resolver for macOS
-    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    jvmArgs(nativeAccess)
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    jvmArgs(nativeAccess)
 }
