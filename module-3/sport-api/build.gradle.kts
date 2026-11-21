@@ -29,6 +29,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation("org.testcontainers:testcontainers-r2dbc")
     testImplementation("io.projectreactor:reactor-test")
     // Testcontainers checks that PostgreSQL is ready over JDBC
     testRuntimeOnly("org.postgresql:postgresql")
@@ -37,4 +38,6 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // Netty loads its native DNS resolver for macOS
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
 }

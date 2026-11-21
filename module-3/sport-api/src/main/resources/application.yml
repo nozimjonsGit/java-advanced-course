@@ -5,3 +5,7 @@ spring:
     url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:55433}/${DB_NAME:module3}
     username: ${DB_USERNAME:module3}
     password: ${DB_PASSWORD:module3}
+  sql:
+    init:
+      # Creates the table from schema.sql on startup, if it does not exist yet
+      mode: always
