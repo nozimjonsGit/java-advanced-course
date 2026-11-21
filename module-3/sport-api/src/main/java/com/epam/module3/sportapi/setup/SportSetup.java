@@ -43,9 +43,9 @@ public class SportSetup implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         AtomicInteger imported = new AtomicInteger();
         importService.importSports()
+                // Errors are not in the list: the subscriber logs them, with the number of sports saved before
                 .log(SIGNAL_LOG_CATEGORY, Level.INFO,
-                        SignalType.ON_SUBSCRIBE, SignalType.REQUEST, SignalType.ON_NEXT,
-                        SignalType.ON_COMPLETE, SignalType.ON_ERROR)
+                        SignalType.ON_SUBSCRIBE, SignalType.REQUEST, SignalType.ON_NEXT, SignalType.ON_COMPLETE)
                 .subscribe(new BatchRequestSubscriber<Sport>(
                         properties.batchSize(),
                         sport -> imported.incrementAndGet(),

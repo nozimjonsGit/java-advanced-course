@@ -105,6 +105,25 @@ class RakutenItemSearchClientTests {
     }
 
     @Test
+    void putsErrorBodyOnOneLine() {
+        String body = """
+                {
+                  "errors": {
+                    "errorCode": 403,
+                    "errorMessage": "Invalid Access Key"
+                  }
+                }
+                """;
+        StubExchangeFunction exchange = StubExchangeFunction.json(HttpStatus.FORBIDDEN, body);
+
+        StepVerifier.create(client(exchange).findChildGenres(101070))
+                .expectErrorSatisfies(error -> assertThat(error).hasMessage(
+                        "Rakuten item search failed with status 403: "
+                                + "{ \"errors\": { \"errorCode\": 403, \"errorMessage\": \"Invalid Access Key\" } }"))
+                .verify();
+    }
+
+    @Test
     void shortensLongErrorBody() {
         StubExchangeFunction exchange = StubExchangeFunction.html(HttpStatus.SERVICE_UNAVAILABLE, "x".repeat(600));
 

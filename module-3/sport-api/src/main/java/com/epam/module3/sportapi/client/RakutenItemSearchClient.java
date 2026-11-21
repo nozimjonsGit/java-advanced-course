@@ -80,7 +80,9 @@ public class RakutenItemSearchClient {
         return children == null ? List.of() : children;
     }
 
+    /** Puts the body on one line, and cuts it to {@value #MAX_ERROR_BODY_LENGTH} characters. */
     private static String abbreviate(String body) {
-        return body.length() <= MAX_ERROR_BODY_LENGTH ? body : body.substring(0, MAX_ERROR_BODY_LENGTH) + "...";
+        String oneLine = body.strip().replaceAll("\\s+", " ");
+        return oneLine.length() <= MAX_ERROR_BODY_LENGTH ? oneLine : oneLine.substring(0, MAX_ERROR_BODY_LENGTH) + "...";
     }
 }
