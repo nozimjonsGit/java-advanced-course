@@ -5,13 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.epam.module3.sportapi.TestcontainersConfiguration;
 import com.epam.module3.sportapi.repository.SportRepository;
 import com.epam.module3.sportapi.source.SportSource;
+import com.epam.module3.sportapi.source.StubSportSource;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +43,12 @@ class SportSetupTests {
     private SportRepository repository;
 
     static SportSource sportSource() {
-        return () -> Flux.fromStream(IntStream.rangeClosed(1, SPORT_COUNT).mapToObj(i -> "Sport " + i));
+        return new StubSportSource(Flux.range(1, SPORT_COUNT).map(i -> "Sport " + i));
     }
 
     @Test
     void importsAllGenresTwentyAtATime(CapturedOutput output) {
-        awaitLog(output, "Imported 45 new sports from Wikidata");
+        awaitLog(output, "Imported 45 new sports from Stub");
 
         assertThat(repository.count().block()).isEqualTo(SPORT_COUNT);
         List<String> expected = new ArrayList<>();

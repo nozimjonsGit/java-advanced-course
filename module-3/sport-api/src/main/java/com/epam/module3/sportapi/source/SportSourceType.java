@@ -6,19 +6,8 @@ package com.epam.module3.sportapi.source;
 public enum SportSourceType {
 
     /** Types of sport on Wikidata. Needs no keys. */
-    WIKIDATA("Wikidata"),
+    WIKIDATA,
 
     /** Child genres of a Rakuten Ichiba genre. Needs Rakuten keys. */
-    RAKUTEN("Rakuten");
-
-    private final String label;
-
-    SportSourceType(String label) {
-        this.label = label;
-    }
-
-    /** The source's name, for log messages. */
-    public String label() {
-        return label;
-    }
+    RAKUTEN
 }

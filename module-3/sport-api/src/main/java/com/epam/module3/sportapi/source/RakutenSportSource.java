@@ -19,6 +19,11 @@ public class RakutenSportSource implements SportSource {
     }
 
     @Override
+    public String name() {
+        return "Rakuten";
+    }
+
+    @Override
     public Flux<String> fetchSportNames() {
         return client.findChildGenres(genreId).map(RakutenGenre::genreName);
     }

@@ -27,6 +27,11 @@ public class SportImportService {
         this.repository = repository;
     }
 
+    /** The name of the source the sports come from. */
+    public String sourceName() {
+        return source.name();
+    }
+
     /**
      * Fetches the sport names, saves a sport for each one, one at a time, and emits the saved
      * sports. Sports that already exist are skipped, so importing again saves only new sports.

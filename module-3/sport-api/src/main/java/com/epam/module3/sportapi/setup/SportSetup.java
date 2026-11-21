@@ -41,7 +41,7 @@ public class SportSetup implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        String source = properties.source().label();
+        String source = importService.sourceName();
         AtomicInteger imported = new AtomicInteger();
         importService.importSports()
                 // Errors are not in the list: the subscriber logs them, with the number of sports saved before

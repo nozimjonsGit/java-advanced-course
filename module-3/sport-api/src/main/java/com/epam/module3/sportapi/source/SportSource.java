@@ -5,8 +5,10 @@ import reactor.core.publisher.Flux;
 /**
  * Where the import gets its sports from.
  */
-@FunctionalInterface
 public interface SportSource {
+
+    /** The source's name, for log messages. */
+    String name();
 
     /**
      * Emits the names of the sports to import. A name may repeat, belong to a sport that is

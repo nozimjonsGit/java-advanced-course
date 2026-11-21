@@ -15,6 +15,11 @@ public class WikidataSportSource implements SportSource {
     }
 
     @Override
+    public String name() {
+        return "Wikidata";
+    }
+
+    @Override
     public Flux<String> fetchSportNames() {
         return client.findSportNames();
     }
