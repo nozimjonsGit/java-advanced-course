@@ -86,7 +86,7 @@ class RakutenItemSearchClientTests {
 
         StepVerifier.create(client(exchange).findChildGenres(101070))
                 .expectErrorSatisfies(error -> assertThat(error)
-                        .isInstanceOf(RakutenApiException.class)
+                        .isInstanceOf(ExternalApiException.class)
                         .hasMessage("Rakuten item search response for genre 101070 has no GenreInformation"))
                 .verify();
     }
@@ -99,7 +99,7 @@ class RakutenItemSearchClientTests {
 
         StepVerifier.create(client(exchange).findChildGenres(101070))
                 .expectErrorSatisfies(error -> assertThat(error)
-                        .isInstanceOf(RakutenApiException.class)
+                        .isInstanceOf(ExternalApiException.class)
                         .hasMessage("Rakuten item search failed with status 403: " + body))
                 .verify();
     }
@@ -129,7 +129,7 @@ class RakutenItemSearchClientTests {
 
         StepVerifier.create(client(exchange).findChildGenres(101070))
                 .expectErrorSatisfies(error -> assertThat(error)
-                        .isInstanceOf(RakutenApiException.class)
+                        .isInstanceOf(ExternalApiException.class)
                         .hasMessage("Rakuten item search failed with status 503: " + "x".repeat(500) + "..."))
                 .verify();
     }
@@ -138,11 +138,11 @@ class RakutenItemSearchClientTests {
     void failsWithoutRequestWhenCredentialsAreMissing() {
         StubExchangeFunction exchange = StubExchangeFunction.json(HttpStatus.OK, sportsResponse());
         RakutenProperties noAccessKey = new RakutenProperties(
-                PROPERTIES.baseUrl(), PROPERTIES.applicationId(), " ", PROPERTIES.timeout());
+                PROPERTIES.baseUrl(), PROPERTIES.applicationId(), " ", PROPERTIES.genreId(), PROPERTIES.timeout());
 
         StepVerifier.create(client(exchange, noAccessKey).findChildGenres(101070))
                 .expectErrorSatisfies(error -> assertThat(error)
-                        .isInstanceOf(RakutenApiException.class)
+                        .isInstanceOf(ExternalApiException.class)
                         .hasMessage("Rakuten credentials are not set: set RAKUTEN_APPLICATION_ID and RAKUTEN_ACCESS_KEY"))
                 .verify();
         assertThat(exchange.requests()).isEmpty();

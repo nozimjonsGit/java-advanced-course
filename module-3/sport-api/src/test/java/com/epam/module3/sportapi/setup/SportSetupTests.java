@@ -3,10 +3,8 @@ package com.epam.module3.sportapi.setup;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.epam.module3.sportapi.TestcontainersConfiguration;
-import com.epam.module3.sportapi.client.RakutenFixtures;
-import com.epam.module3.sportapi.client.RakutenItemSearchClient;
-import com.epam.module3.sportapi.client.StubExchangeFunction;
 import com.epam.module3.sportapi.repository.SportRepository;
+import com.epam.module3.sportapi.source.SportSource;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,41 +19,38 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.convention.TestBean;
 import reactor.core.publisher.Flux;
 
 /**
- * Starts the application with a Rakuten stub that returns 45 genres, and checks in the log that
- * the import requests them 20 at a time.
+ * Starts the application with a source of 45 sports, and checks in the log that the import
+ * requests them 20 at a time.
  */
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
 @ExtendWith(OutputCaptureExtension.class)
 class SportSetupTests {
 
-    private static final int GENRE_COUNT = 45;
+    private static final int SPORT_COUNT = 45;
 
     private static final Pattern SIGNAL = Pattern.compile(
             Pattern.quote(SportSetup.SIGNAL_LOG_CATEGORY) + "\\s*:\\s*(\\w+)\\(([^)]*)");
 
     @TestBean
-    private RakutenItemSearchClient client;
+    private SportSource sportSource;
 
     @Autowired
     private SportRepository repository;
 
-    static RakutenItemSearchClient client() {
-        List<String> names = IntStream.rangeClosed(1, GENRE_COUNT).mapToObj(i -> "Sport " + i).toList();
-        String response = RakutenFixtures.responseWithChildGenres(names);
-        return RakutenFixtures.client(StubExchangeFunction.json(HttpStatus.OK, response));
+    static SportSource sportSource() {
+        return () -> Flux.fromStream(IntStream.rangeClosed(1, SPORT_COUNT).mapToObj(i -> "Sport " + i));
     }
 
     @Test
     void importsAllGenresTwentyAtATime(CapturedOutput output) {
         awaitLog(output, "Imported 45 new sports from Rakuten");
 
-        assertThat(repository.count().block()).isEqualTo(GENRE_COUNT);
+        assertThat(repository.count().block()).isEqualTo(SPORT_COUNT);
         List<String> expected = new ArrayList<>();
         expected.add("onSubscribe");
         expected.add("request(20)");

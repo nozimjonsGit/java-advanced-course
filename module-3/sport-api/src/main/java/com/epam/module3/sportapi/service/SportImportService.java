@@ -1,9 +1,8 @@
 package com.epam.module3.sportapi.service;
 
-import com.epam.module3.sportapi.client.RakutenItemSearchClient;
-import com.epam.module3.sportapi.config.SportImportProperties;
 import com.epam.module3.sportapi.entity.Sport;
 import com.epam.module3.sportapi.repository.SportRepository;
+import com.epam.module3.sportapi.source.SportSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -12,31 +11,28 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Imports sports from Rakuten: the child genres of the configured genre become sports.
+ * Imports the sports of the configured {@link SportSource}.
  */
 @Service
 public class SportImportService {
 
     private static final Logger log = LoggerFactory.getLogger(SportImportService.class);
 
-    private final RakutenItemSearchClient client;
+    private final SportSource source;
     private final SportRepository repository;
-    private final SportImportProperties properties;
 
-    public SportImportService(
-            RakutenItemSearchClient client, SportRepository repository, SportImportProperties properties) {
-        this.client = client;
+    public SportImportService(SportSource source, SportRepository repository) {
+        this.source = source;
         this.repository = repository;
-        this.properties = properties;
     }
 
     /**
-     * Fetches the genres, saves a sport for each one, one at a time, and emits the saved sports.
-     * Sports that already exist are skipped, so importing again saves only new genres.
+     * Fetches the sport names, saves a sport for each one, one at a time, and emits the saved
+     * sports. Sports that already exist are skipped, so importing again saves only new sports.
      */
     public Flux<Sport> importSports() {
-        return client.findChildGenres(properties.genreId())
-                .map(genre -> Sport.named(genre.genreName()))
+        return source.fetchSportNames()
+                .map(Sport::named)
                 .concatMap(this::saveUnlessExists);
     }
 

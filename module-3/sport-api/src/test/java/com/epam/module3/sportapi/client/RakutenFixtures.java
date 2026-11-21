@@ -7,8 +7,6 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -17,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public final class RakutenFixtures {
 
     public static final RakutenProperties PROPERTIES = new RakutenProperties(
-            URI.create("https://rakuten.test"), "test-application-id", "test+access/key", Duration.ofSeconds(5));
+            URI.create("https://rakuten.test"), "test-application-id", "test+access/key", 101070, Duration.ofSeconds(5));
 
     private RakutenFixtures() {
     }
@@ -29,16 +27,6 @@ public final class RakutenFixtures {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    /** A response whose genre has the given child genres, named after themselves. */
-    public static String responseWithChildGenres(List<String> names) {
-        String children = names.stream()
-                .map(name -> "{\"genreId\": %d, \"genreName\": \"%s\", \"genreLevel\": 2}"
-                        .formatted(200000 + names.indexOf(name), name))
-                .collect(Collectors.joining(","));
-        return "{\"Items\": [], \"GenreInformation\": [{\"parent\": [], \"current\": [], \"children\": [%s]}]}"
-                .formatted(children);
     }
 
     public static RakutenItemSearchClient client(StubExchangeFunction exchange) {
